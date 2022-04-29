@@ -1,26 +1,41 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
-version: 2.1
+ame: RDP-VPS
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+on: workflow_dispatch
+
 jobs:
-  say-hello:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
-    docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
-    steps:
-      - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+  build:
 
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
-workflows:
-  say-hello-workflow:
-    jobs:
-      - say-hello
+    runs-on: windows-latest
+    timeout-minutes: 9999
+
+    steps:
+    - name: Download Ngrok & NSSM
+      run: |
+        Invoke-WebRequest https://drive.google.com/uc?id=1Lp31uLeyIjnItbIWXNigXfxsMi7t5PUZ -OutFile ngrok.exe
+        Invoke-WebRequest https://drive.google.com/uc?id=1IiGQBz2dKWy7MnNfkelEIxNpBzWKkxX5 -OutFile nssm.exe
+    - name: Copy NSSM & Ngrok to Windows Directory.
+      run: | 
+        copy nssm.exe C:\Windows\System32
+        copy ngrok.exe C:\Windows\System32
+    - name: Connect your NGROK account
+      run: .\ngrok.exe authtoken $Env:28Ue5hwmbLhoFaWhbDaalTwjGsV_62jcNuVDuBsa2jcDXRzT5
+      env:
+        NGROK_AUTH_TOKEN: ${{ 28Ue5hwmbLhoFaWhbDaalTwjGsV_62jcNuVDuBsa2jcDXRzT5 }}
+    - name: Download Important Files.
+      run: |
+        Invoke-WebRequest https://drive.google.com/uc?id=13WebNaPOwCM4JdEGFnc6FkTmMRrE2KGt  -OutFile NGROK-AP.bat
+        Invoke-WebRequest https://drive.google.com/uc?id=1SRlO9RzQmhfRVR6FilyB2k4JRZaADEbA  -OutFile NGROK-CHECK.bat
+        Invoke-WebRequest https://drive.google.com/uc?id=17V_ZBSRkzNSlNG2F35F4ze8PHzZiH6_x -OutFile loop.bat
+    - name: Make YML file for NGROK.
+      run: start NGROK-AP.bat
+    - name: Enable RDP Access.
+      run: | 
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
+    - name: Create Tunnel
+      run: sc start ngrok
+    - name: Connect to your RDP CPU 2 Core - 7GB Ram - 255 SSD.
+      run: cmd /c NGROK-CHECK.bat
+    - name: All Done! You can close Tab now! Maximum VM time:6h.
+      run: cmd /c loop.bat
