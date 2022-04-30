@@ -28,7 +28,7 @@ jobs:
           pkg-manager: npm
       - run:
           name: Run tests
-          command: npm start
+          command: node first.js
 
 workflows:
   # Below is the definition of your workflow.
