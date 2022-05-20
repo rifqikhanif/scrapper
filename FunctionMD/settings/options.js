@@ -5,7 +5,7 @@
  monayawal: 1000,
  limitawal: 15,
  info: {
-   owner: ["6295421438653@s.whatsapp.net","6287769744173@s.whatsapp.net"],
+   owner: ["6288227606701@s.whatsapp.net","6287769744173@s.whatsapp.net"],
    ownerName: "©rkhanif"
    },
  rpg: {
